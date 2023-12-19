@@ -46,9 +46,6 @@ export default defineNuxtConfig({
 
 ```bash
 yarn add -D eslint-plugin-nuxt eslint-plugin-vue
-
-touch .eslintrc.js
-
 yarn add -D @typescript-eslint/eslint-plugin @typescript-eslint/parser typescript
 ```
 
@@ -92,9 +89,9 @@ yarn add -D @nuxtjs/tailwindcss
 export default defineNuxtConfig({
   modules: [
     '@nuxtjs/eslint-module',
-    '@nuxtjs/tailwindcss', // 추가해준다
+    '@nuxtjs/tailwindcss',
   ],
-  css: [ // 추가해준다
+  css: [
     '@/assets/css/app.css',
   ],
 })
@@ -120,34 +117,36 @@ export default {
 ### css
 
 ```bash
-# assets\css\app.css
-@import './preflight.css';
-@import './custom.css';
-
-# assets\css\preflight.css
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-# assets\css\custom.css
-@layer components {
-}
-
+# /assets/css/app.css
+# /assets/css/preflight.css
+# /assets/css/custom.css
 ```
 
 ## directory
 
 ### Nuxt Directory Structure
 - 프로젝트의 구조는 아래를 참고 한다
-```bash
-https://nuxt.com/docs/guide/directory-structure/app
-```
+- https://nuxt.com/docs/guide/directory-structure/app
 
 ### app.vue
+- application main
+- ```pages/``` directory가 없을 경우, router dependency가 없음
 
 ### pages/index.vue
+- ```pages/``` directory 가 있으면 ```index.vue```가 application의 ```/```가 된다
+- api,gpt용 화면
 
 ### server/api/hello.ts
+- ```pages/index.vue```에서 api test 해본다
+
+```bash
+<script setup lang="ts">
+......
+  const result = await $fetch("/api/hello")
+  console.log(result)
+......
+</script>
+```
 
 ## openai
 
@@ -168,84 +167,13 @@ export {
 ```
 
 ### server/lib/openai.ts
-
+- gpt 질문/답변
 
 
 ### server/api/client.post.ts
+- client의 질문을 gpt에게 물어보고 답변을 client에게 되돌려 줌
+- Array로 대화 기억
 
-```bash
-import { chat } from '@/server/lib/openai'
-import { type chatlist } from '@/types/openai'
-
-const conversation: Array<chatlist> = [] // 나눈 대화를 저장해서 기억하도록 함
-
-export default defineEventHandler(async (event) => {
-  // GPT에게 물어보기
-  const body = await readBody(event)
-  if (body.prompt) {
-    // result값이 들어갔을때 배열에 저장
-    console.log('[/server/api/client.post] 질문내용 : ' + body.prompt)
-    conversation.push({role: 'user', content: body.prompt})
-
-    // 질문던지기
-    const quest = await chat(conversation)
-    if (quest) {
-      // 답변이 정상적으로 왔다면 리턴
-      conversation.push({role: 'assistant', content: JSON.stringify(quest)})
-      return {
-        result: quest,
-      }
-    }
-  } else {
-    // 질문이 없는경우
-    throw createError({
-      statusCode: 400,
-      statusMessage: '질문이 입력되지 않았습니다.',
-    })
-  }
-})
-```
-
-### pages/index.vue
-
-```bash
-<script setup lang="ts">
-import { type chatlist } from '@/types/openai'
-const conversation = ref<Array<chatlist>>([]) // 대화를 담을 배열
-const prompt = ref('') // 서버에 넘겨줄 질문
-
-async function quest () {
-  console.log('[/pages/index] 질문버튼눌림')
-  const string = prompt.value
-  conversation.value.push({role: 'user', content: string})
-  console.log('[/pages/index] 입력된질문:' + conversation)
-  prompt.value = ''
-  const data = await $fetch('/api/client', {
-    method: 'POST',
-    body: { prompt: string }
-  }).catch((err) => {
-    alert('실패!')
-    console.log(err)
-  })
-
-  if (data?.result) {
-    conversation.value.push(data.result)
-    console.log('[/pages/index] 리번받은답변:' + conversation)
-  }
-}
-</script>
-
-<template>
-  <ul class="p-5">
-    <li v-for="(list, index) in conversation" :key="index"> {{ list }} </li>
-  </ul>
-
-  <fieldset>
-    <textarea v-model="prompt" class="border">prompt</textarea>
-    <button type="button" @click="quest()"> 질문 </button>
-  </fieldset>
-</template>
-```
 
 
 

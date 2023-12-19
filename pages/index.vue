@@ -20,7 +20,7 @@ const height = computed(() => {
   return '3rem'
 })
 
-async function quest () {
+async function quest() {
   console.log('[/pages/index] 질문버튼눌림')
   const string = prompt.value
   conversation.value.push({role: 'user', content: string})
