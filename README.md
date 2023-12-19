@@ -154,16 +154,6 @@ export default {
 
 ```bash
 yarn add openai
-
-# types/openai.ts
-interface chatlist {
-    role: 'user'|'assistant'|'system',
-    content: string
-}
-
-export {
-    chatlist
-}
 ```
 
 ### server/lib/openai.ts
@@ -174,6 +164,16 @@ export {
 - client의 질문을 gpt에게 물어보고 답변을 client에게 되돌려 줌
 - Array로 대화 기억
 
+```bash
+# types/openai.ts
+interface chatlist {
+    role: 'user'|'assistant'|'system',
+    content: string
+}
 
+export {
+    chatlist
+}
+```
 
 
